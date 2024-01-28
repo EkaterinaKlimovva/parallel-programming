@@ -1,0 +1,46 @@
+import asyncio
+
+class Waiter:
+    async def take_order(self, client):
+        print(f"Waiter: Taking order from {client.client_name}")
+    async def deliver_order(self, client):
+        print(f"Waiter: Order delivered to kitchen from  {client.client_name}")
+    async def serve_order(self, client):
+        print(f"Waiter: Order served to {client.client_name}")
+
+class Client:
+    def __init__(self, client_name, waiter):
+        self.client_name = client_name
+        self.waiter = waiter
+    async def place_order(self):
+        print(f"Client: {self.client_name} places an order")
+        await self.waiter.take_order(self)
+    async def wait_for_order(self):
+        print(f"Client: {self.client_name} waits for the order")
+        await self.waiter.deliver_order(self)
+
+class Kitchen:
+    def __init__(self, waiter):
+        self.waiter = waiter
+    async def prepare_order(self, client):
+        print(f"Kitchen: The {client.client_name}'s order is being prepared")
+        await asyncio.sleep(5)
+        print(f"Kitchen: The {client.client_name}'s order is ready")
+        await self.waiter.serve_order(client)
+
+async def main():
+    waiter = Waiter()
+    kitchen = Kitchen(waiter)
+    clients = [
+        Client("Bob", waiter),
+        Client("Emma", waiter),
+        Client("John", waiter)
+    ]
+    tasks = []
+    for client in clients:
+        tasks.append(asyncio.create_task(client.place_order()))
+        tasks.append(asyncio.create_task(client.wait_for_order()))
+        tasks.append(asyncio.create_task(kitchen.prepare_order(client)))
+        await asyncio.gather(*tasks)
+    if __name__ == "__main__":
+        asyncio.run(main())
