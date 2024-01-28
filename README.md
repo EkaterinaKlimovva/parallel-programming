@@ -1,1 +1,1 @@
-# parallel-programming
+Some Python parallel programming sripts
